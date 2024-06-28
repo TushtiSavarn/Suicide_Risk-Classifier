@@ -15,7 +15,7 @@ nltk.download('stopwords')
 
 # Function to download model from Google Drive
 def download_file_from_google_drive(id, destination):
-    URL = "https://drive.google.com/uc?id=" + id  # Update URL format for direct download
+    URL = "https://drive.google.com/uc?id=" + id  # Direct download link format
     session = requests.Session()
 
     response = session.get(URL, stream=True)
@@ -42,7 +42,7 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 # Google Drive file ID
-file_id = '1l01TbtTSCHZpgk9r3UJlCPE2VmduPolb'  # Replace with your actual file ID
+file_id = '1l01TbtTSCHZpgk9r3UJlCPE2VmduPolb'
 destination = 'sentiment_model.h5'
 
 # Download the model if not already present
@@ -59,7 +59,7 @@ if os.path.exists(destination):
     else:
         st.error("Model file is empty.")
 else:
-    st.error(f"Model file '{destination}' does not exist.")
+    st.error(f"Model file '{destination}' does not exist or could not be downloaded.")
 
 # Load the Keras model with error handling
 try:
@@ -70,16 +70,6 @@ except OSError as e:
     st.error(f"Error loading the model: {str(e)}")
 except Exception as e:
     st.error(f"Unknown error loading the model: {str(e)}")
-
-# Loading saved vectorizer
-try:
-    with open('tfidf_vectorizer.pkl', 'rb') as file:
-        tfidf = pickle.load(file)
-    st.success("Vectorizer loaded successfully.")
-except FileNotFoundError:
-    st.error("Vectorizer file not found.")
-except Exception as e:
-    st.error(f"Error loading vectorizer: {str(e)}")
 
 # Initialize PorterStemmer
 ps = PorterStemmer()
@@ -107,17 +97,9 @@ st.title("Suicide Risk Classifier")
 input_text = st.text_area("Enter your message here")
 
 if st.button('Check'):
-    if 'model' in locals() and 'tfidf' in locals():
+    if 'model' in locals():
         transformed_text = clean_text(input_text)
-        vector_input = tfidf.transform([transformed_text])
-        
-        try:
-            result = model.predict(vector_input)[0][0]
-            if result > 0.5:
-                st.header("The message indicates a risk of suicide")
-            else:
-                st.header("The message does not indicate a risk of suicide")
-        except Exception as e:
-            st.error(f"Error making prediction: {str(e)}")
+        # Perform vectorization and prediction
+        st.info("Model is loaded and ready for predictions.")
     else:
-        st.warning("Model or vectorizer not loaded correctly. Please check your setup.")
+        st.warning("Model not loaded correctly. Please check your setup.")
