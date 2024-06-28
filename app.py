@@ -15,8 +15,7 @@ nltk.download('stopwords')
 
 # Function to download model from Google Drive
 def download_file_from_google_drive(id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-
+    URL = "https://drive.google.com/file/d/1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6/view?usp=drive_link"
     session = requests.Session()
 
     response = session.get(URL, params={'id': id}, stream=True)
@@ -43,7 +42,7 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 # Google Drive file ID
-file_id = '1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6'
+file_id = 'https://drive.google.com/file/d/1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6/view?usp=drive_link6'
 destination = 'sentiment_model.h5'
 
 # Download the model if not already present
