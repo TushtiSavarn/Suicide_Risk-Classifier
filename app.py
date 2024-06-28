@@ -1,21 +1,11 @@
 import streamlit as st
-import pickle
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-import string
 import requests
 from tensorflow.keras.models import load_model
-import re
 import os
 
-# Download NLTK resources
-nltk.download('punkt')
-nltk.download('stopwords')
-
-# Function to download model from Google Drive
+# Function to download file from Google Drive
 def download_file_from_google_drive(id, destination):
-    URL = "https://drive.google.com/uc?id=" + id  # Direct download link format
+    URL = "https://drive.google.com/uc?id=" + id
     session = requests.Session()
 
     response = session.get(URL, stream=True)
@@ -41,7 +31,7 @@ def save_response_content(response, destination):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
 
-# Google Drive file ID
+# Google Drive file ID and destination
 file_id = '1l01TbtTSCHZpgk9r3UJlCPE2VmduPolb'
 destination = 'sentiment_model.h5'
 
@@ -49,48 +39,20 @@ destination = 'sentiment_model.h5'
 if not os.path.exists(destination):
     st.info("Downloading the model...")
     download_file_from_google_drive(file_id, destination)
-    st.info("Download completed.")
+    st.success("Model downloaded successfully.")
 
-# Check if the downloaded file is valid
+# Check if the model file exists and load it
 if os.path.exists(destination):
-    st.info(f"Model file '{destination}' exists.")
-    if os.path.getsize(destination) > 0:
-        st.success("Model file is non-empty.")
-    else:
-        st.error("Model file is empty.")
+    try:
+        st.info("Loading the model...")
+        model = load_model(destination)
+        st.success("Model loaded successfully.")
+    except OSError as e:
+        st.error(f"Error loading the model: {str(e)}")
+    except Exception as e:
+        st.error(f"Unknown error loading the model: {str(e)}")
 else:
     st.error(f"Model file '{destination}' does not exist or could not be downloaded.")
-
-# Load the Keras model with error handling
-try:
-    st.info("Loading the model...")
-    model = load_model(destination)
-    st.success("Model loaded successfully.")
-except OSError as e:
-    st.error(f"Error loading the model: {str(e)}")
-except Exception as e:
-    st.error(f"Unknown error loading the model: {str(e)}")
-
-# Initialize PorterStemmer
-ps = PorterStemmer()
-
-# Text preprocessing function
-def clean_text(text):
-    # Remove special characters and emojis
-    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
-    text = text.lower()
-    text = nltk.word_tokenize(text)
-    
-    # Remove non-alphanumeric characters
-    text = [word for word in text if word.isalnum()]
-    
-    # Remove stopwords
-    text = [word for word in text if word not in stopwords.words('english') and word not in string.punctuation]
-    
-    # Stemming
-    text = [ps.stem(word) for word in text]
-    
-    return " ".join(text)
 
 # Streamlit app
 st.title("Suicide Risk Classifier")
@@ -98,8 +60,7 @@ input_text = st.text_area("Enter your message here")
 
 if st.button('Check'):
     if 'model' in locals():
-        transformed_text = clean_text(input_text)
-        # Perform vectorization and prediction
-        st.info("Model is loaded and ready for predictions.")
+        # Perform inference with the loaded model
+        st.info("Model is loaded and ready.")
     else:
         st.warning("Model not loaded correctly. Please check your setup.")
