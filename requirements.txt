@@ -2,7 +2,7 @@ pandas
 numpy
 matplotlib
 seaborn
-tensorflow
+tensorflow==2.9.0
 nltk
 scikit-learn
 plotly
