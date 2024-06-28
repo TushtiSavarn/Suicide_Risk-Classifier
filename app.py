@@ -4,18 +4,58 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 import string
+import requests
 from tensorflow.keras.models import load_model
 import re
+import os
 
 # Download NLTK resources
 nltk.download('punkt')
 nltk.download('stopwords')
 
-# Load the TF-IDF vectorizer and Keras model
+# Function to download model from Google Drive
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+
+    response = session.get(URL, params={'id': id}, stream=True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+
+    save_response_content(response, destination)    
+
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+    return None
+
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:  # filter out keep-alive new chunks
+                f.write(chunk)
+
+# Google Drive file ID
+file_id = 'https://drive.google.com/file/d/1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6/view?usp=drive_link'
+destination = 'sentiment_model.h5'
+
+# Download the model
+if not os.path.exists(destination):
+    download_file_from_google_drive(file_id, destination)
+
+# Loading saved vectorizer
 with open('tfidf_vectorizer.pkl', 'rb') as file:
     tfidf = pickle.load(file)
 
-model = load_model('sentiment_model.h5')
+# Load the Keras model
+model = load_model(destination)
 
 # Initialize PorterStemmer
 ps = PorterStemmer()
