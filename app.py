@@ -42,7 +42,7 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 # Google Drive file ID
-file_id = '1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6'  # Replace with your actual file ID
+file_id = '1l01TbtTSCHZpgk9r3UJlCPE2VmduPolb'  # Replace with your actual file ID
 destination = 'sentiment_model.h5'
 
 # Download the model if not already present
@@ -55,16 +55,18 @@ if os.path.exists(destination) and os.path.getsize(destination) > 0:
 else:
     st.error("Failed to download the model. Please check your setup.")
 
-# Loading saved vectorizer
-with open('tfidf_vectorizer.pkl', 'rb') as file:
-    tfidf = pickle.load(file)
-
 # Load the Keras model with error handling
 try:
     model = load_model(destination)
     st.success("Model loaded successfully.")
 except OSError as e:
     st.error(f"Error loading the model: {str(e)}")
+except Exception as e:
+    st.error(f"Unknown error loading the model: {str(e)}")
+
+# Loading saved vectorizer
+with open('tfidf_vectorizer.pkl', 'rb') as file:
+    tfidf = pickle.load(file)
 
 # Initialize PorterStemmer
 ps = PorterStemmer()
