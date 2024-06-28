@@ -26,7 +26,7 @@ def download_file_from_google_drive(id, destination):
         params = {'id': id, 'confirm': token}
         response = session.get(URL, params=params, stream=True)
 
-    save_response_content(response, destination)    
+    save_response_content(response, destination)
 
 def get_confirm_token(response):
     for key, value in response.cookies.items():
@@ -43,10 +43,10 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 # Google Drive file ID
-file_id = 'https://drive.google.com/file/d/1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6/view?usp=drive_link'
+file_id = '1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6'
 destination = 'sentiment_model.h5'
 
-# Download the model
+# Download the model if not already present
 if not os.path.exists(destination):
     download_file_from_google_drive(file_id, destination)
 
