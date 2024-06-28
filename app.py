@@ -47,16 +47,23 @@ destination = 'sentiment_model.h5'
 
 # Download the model if not already present
 if not os.path.exists(destination):
+    st.info("Downloading the model...")
     download_file_from_google_drive(file_id, destination)
+    st.info("Download completed.")
 
 # Check if the downloaded file is valid
-if os.path.exists(destination) and os.path.getsize(destination) > 0:
-    st.success("Model downloaded successfully.")
+if os.path.exists(destination):
+    st.info(f"Model file '{destination}' exists.")
+    if os.path.getsize(destination) > 0:
+        st.success("Model file is non-empty.")
+    else:
+        st.error("Model file is empty.")
 else:
-    st.error("Failed to download the model. Please check your setup.")
+    st.error(f"Model file '{destination}' does not exist.")
 
 # Load the Keras model with error handling
 try:
+    st.info("Loading the model...")
     model = load_model(destination)
     st.success("Model loaded successfully.")
 except OSError as e:
@@ -65,8 +72,14 @@ except Exception as e:
     st.error(f"Unknown error loading the model: {str(e)}")
 
 # Loading saved vectorizer
-with open('tfidf_vectorizer.pkl', 'rb') as file:
-    tfidf = pickle.load(file)
+try:
+    with open('tfidf_vectorizer.pkl', 'rb') as file:
+        tfidf = pickle.load(file)
+    st.success("Vectorizer loaded successfully.")
+except FileNotFoundError:
+    st.error("Vectorizer file not found.")
+except Exception as e:
+    st.error(f"Error loading vectorizer: {str(e)}")
 
 # Initialize PorterStemmer
 ps = PorterStemmer()
@@ -94,15 +107,17 @@ st.title("Suicide Risk Classifier")
 input_text = st.text_area("Enter your message here")
 
 if st.button('Check'):
-    transformed_text = clean_text(input_text)
-    vector_input = tfidf.transform([transformed_text])
-    
-    # Ensure model is loaded before prediction
-    if 'model' in locals():
-        result = model.predict(vector_input)[0][0]
-        if result > 0.5:
-            st.header("The message indicates a risk of suicide")
-        else:
-            st.header("The message does not indicate a risk of suicide")
+    if 'model' in locals() and 'tfidf' in locals():
+        transformed_text = clean_text(input_text)
+        vector_input = tfidf.transform([transformed_text])
+        
+        try:
+            result = model.predict(vector_input)[0][0]
+            if result > 0.5:
+                st.header("The message indicates a risk of suicide")
+            else:
+                st.header("The message does not indicate a risk of suicide")
+        except Exception as e:
+            st.error(f"Error making prediction: {str(e)}")
     else:
-        st.warning("Model not loaded correctly. Please check your setup.")
+        st.warning("Model or vectorizer not loaded correctly. Please check your setup.")
