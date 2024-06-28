@@ -15,10 +15,10 @@ nltk.download('stopwords')
 
 # Function to download model from Google Drive
 def download_file_from_google_drive(id, destination):
-    URL = "https://drive.google.com/file/d/1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6/view?usp=drive_link"
+    URL = "https://drive.google.com/uc?id=" + id  # Update URL format for direct download
     session = requests.Session()
 
-    response = session.get(URL, params={'id': id}, stream=True)
+    response = session.get(URL, stream=True)
     token = get_confirm_token(response)
 
     if token:
@@ -42,7 +42,7 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 # Google Drive file ID
-file_id = 'https://drive.google.com/file/d/1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6/view?usp=drive_link6'
+file_id = '1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6'  # Extracted file ID
 destination = 'sentiment_model.h5'
 
 # Download the model if not already present
@@ -53,8 +53,11 @@ if not os.path.exists(destination):
 with open('tfidf_vectorizer.pkl', 'rb') as file:
     tfidf = pickle.load(file)
 
-# Load the Keras model
-model = load_model(destination)
+# Load the Keras model with error handling
+try:
+    model = load_model(destination)
+except OSError as e:
+    st.error(f"Error loading the model: {str(e)}")
 
 # Initialize PorterStemmer
 ps = PorterStemmer()
@@ -84,9 +87,13 @@ input_text = st.text_area("Enter your message here")
 if st.button('Check'):
     transformed_text = clean_text(input_text)
     vector_input = tfidf.transform([transformed_text])
-    result = model.predict(vector_input)[0][0]
     
-    if result > 0.5:
-        st.header("The message indicates a risk of suicide")
+    # Ensure model is loaded before prediction
+    if 'model' in locals():
+        result = model.predict(vector_input)[0][0]
+        if result > 0.5:
+            st.header("The message indicates a risk of suicide")
+        else:
+            st.header("The message does not indicate a risk of suicide")
     else:
-        st.header("The message does not indicate a risk of suicide")
+        st.warning("Model not loaded correctly. Please check your setup.")
