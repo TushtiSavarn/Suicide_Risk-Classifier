@@ -93,9 +93,6 @@ The model is trained with binary cross-entropy loss and the Adam optimizer.
 ## Streamlit Application
 
 The Streamlit app provides a simple interface to interact with the classifier. The app allows users to input text and get real-time predictions about the risk of suicide in the text.
-## External Model Hosting
-Due to file size constraints, the machine learning model is hosted externally. You can download the model from Google Drive and place it in the project directory.
-link:-(https://drive.google.com/file/d/1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6/view?usp=drive_link)
 
 ## Contributing
 
