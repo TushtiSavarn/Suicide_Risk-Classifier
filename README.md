@@ -11,6 +11,7 @@ Suicide Risk Classifier is a machine learning project aimed at detecting suicide
 
 ## Table of Contents
 
+- [Dataset used](#Dataset)
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -21,7 +22,10 @@ Suicide Risk Classifier is a machine learning project aimed at detecting suicide
 - [License](#license)
 - [Acknowledgements](#acknowledgements)
 
-## Features
+##Dataset
+ link:-(https://www.kaggle.com/datasets/nikhileswarkomati/suicide-watch)
+
+ ## Features
 
 - **Text Cleaning**: Removes special characters, emojis, and stopwords.
 - **Text Preprocessing**: Includes tokenization, stemming, and TF-IDF vectorization.
