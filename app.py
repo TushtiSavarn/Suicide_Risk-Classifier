@@ -42,12 +42,18 @@ def save_response_content(response, destination):
                 f.write(chunk)
 
 # Google Drive file ID
-file_id = '1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6'  # Extracted file ID
+file_id = '1zkgHczQMD5raRFxDgPXTQeNLCzH_nVm6'  # Replace with your actual file ID
 destination = 'sentiment_model.h5'
 
 # Download the model if not already present
 if not os.path.exists(destination):
     download_file_from_google_drive(file_id, destination)
+
+# Check if the downloaded file is valid
+if os.path.exists(destination) and os.path.getsize(destination) > 0:
+    st.success("Model downloaded successfully.")
+else:
+    st.error("Failed to download the model. Please check your setup.")
 
 # Loading saved vectorizer
 with open('tfidf_vectorizer.pkl', 'rb') as file:
@@ -56,6 +62,7 @@ with open('tfidf_vectorizer.pkl', 'rb') as file:
 # Load the Keras model with error handling
 try:
     model = load_model(destination)
+    st.success("Model loaded successfully.")
 except OSError as e:
     st.error(f"Error loading the model: {str(e)}")
 
