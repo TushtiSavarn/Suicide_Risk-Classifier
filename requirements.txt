@@ -1,4 +1,8 @@
 streamlit
-nltk
-tensorflow
 requests
+tensorflow
+nltk
+h5py
+scikit-learn
+numpy
+pandas
