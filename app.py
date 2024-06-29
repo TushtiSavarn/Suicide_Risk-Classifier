@@ -1,43 +1,53 @@
 import streamlit as st
-import requests
-import os
+import pickle
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+import string
 from tensorflow.keras.models import load_model
+import re
 
-# Function to download file from GitHub using raw URL
-def download_file_from_github(url, destination):
-    response = requests.get(url, stream=True)
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
-                f.write(chunk)
+# Download NLTK resources
+nltk.download('punkt')
+nltk.download('stopwords')
 
-# GitHub raw URL and local path
-github_url = 'https://github.com/TushtiSavarn/Suicide_Risk-Classifier/raw/main/sentiment_model.h5'
-model_path = 'sentiment_model.h5'
+# Load the TF-IDF vectorizer and Keras model
+with open('tfidf_vectorizer.pkl', 'rb') as file:
+    tfidf = pickle.load(file)
 
-# Download the model if not already present
-if not os.path.exists(model_path):
-    st.info("Downloading the model...")
-    download_file_from_github(github_url, model_path)
-    st.success("Model downloaded successfully.")
+model = load_model('sentiment_model.h5')
 
-# Load the Keras model
-try:
-    st.info("Loading the model...")
-    model = load_model(model_path)
-    st.success("Model loaded successfully.")
-except OSError as e:
-    st.error(f"Error loading the model: {str(e)}")
-except Exception as e:
-    st.error(f"Unknown error loading the model: {str(e)}")
+# Initialize PorterStemmer
+ps = PorterStemmer()
+
+# Text preprocessing function
+def clean_text(text):
+    # Remove special characters and emojis
+    text = re.sub(r'[^a-zA-Z0-9\s]', '', text)
+    text = text.lower()
+    text = nltk.word_tokenize(text)
+    
+    # Remove non-alphanumeric characters
+    text = [word for word in text if word.isalnum()]
+    
+    # Remove stopwords
+    text = [word for word in text if word not in stopwords.words('english') and word not in string.punctuation]
+    
+    # Stemming
+    text = [ps.stem(word) for word in text]
+    
+    return " ".join(text)
 
 # Streamlit app
 st.title("Suicide Risk Classifier")
 input_text = st.text_area("Enter your message here")
 
 if st.button('Check'):
-    if 'model' in locals():
-        # Perform inference with the loaded model
-        st.info("Model is loaded and ready.")
+    transformed_text = clean_text(input_text)
+    vector_input = tfidf.transform([transformed_text])
+    result = model.predict(vector_input)[0][0]
+    
+    if result > 0.5:
+        st.header("The message indicates a risk of suicide")
     else:
-        st.warning("Model not loaded correctly. Please check your setup.")
+        st.header("The message does not indicate a risk of suicide")
