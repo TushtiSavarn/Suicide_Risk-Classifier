@@ -24,6 +24,9 @@ Suicide Risk Classifier is a machine learning project aimed at detecting suicide
 
 ## Dataset
  link:-(https://www.kaggle.com/datasets/nikhileswarkomati/suicide-watch)
+## External Model Hosting
+Due to file size constraints, the machine learning model is hosted externally. You can download the model from Google Drive and place it in the project directory.
+link:-(https://drive.google.com/file/d/1l01TbtTSCHZpgk9r3UJlCPE2VmduPolb/view?usp=sharing)
 
  ## Features
 
